@@ -1,24 +1,47 @@
 #pragma once
 
-/**
- * Specify an extern const char* to reference an embedded resource file as string.
- * args:
- * - rsrcName: name of embedded resource file.
- * ret:
- * - void
- */
-#define EMBED_STR(rsrcName)\
-  extern const char* rsrcName
+#include <string>
 
 /**
- * Return a string from an embedded const char pointer referencing a resource file as string.
- * args:
- * - rsrcName: name of embedded resource file.
- * ret:
- * - a const char ptr. to the embedded resource.
+ * RSRC_REF(rsrc)
+ * 
+ * Define an extern-const-char-ptr matching an embedded resource file.
+ * 
+ * @author M. van de Ruit
+ * 
+ * @param rsrc - name of embedded resource file
  */
-#define EXTERN_STR(rsrcName)\
+#define RSRC_REF(rsrc)\
+  extern const char* rsrc
+
+/**
+ * RSRC_EMBED(rsrc)
+ * 
+ * Return a string matching an extern-const-char-ptr matching an embedded resource file.
+ * 
+ * @author M. van de Ruit
+ * 
+ * @param rsrc - name of embedded resource file
+ * @return string object with embedded resource
+ */
+#define RSRC_EMBED(rsrc)\
+  []() -> std::string {\
+    RSRC_REF(rsrc);\
+    return std::string(rsrc);\
+  }()
+  
+/**
+ * RSRC_EMBED_C(rsrc)
+ * 
+ * Return a char pointer matching an extern-const-char-ptr matching an embedded resource file.
+ * 
+ * @author M. van de Ruit
+ * 
+ * @param rsrc - name of embedded resource file
+ * @return char pointer with embedded resource
+ */
+#define RSRC_EMBED_C(rsrc)\
   []() -> const char* {\
-    embedRsrc(rsrcName);\
+    RSRC_REF(rsrc);\
     return rsrc;\
   }()

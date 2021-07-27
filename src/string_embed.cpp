@@ -32,6 +32,9 @@ int main(int argc, char** argv) {
 
     // Copy over output contents with input file contents prepended as a const char*
     output << "const char* " << symbolName << " = R\"RSRCDELIM(\n" << input.rdbuf() << "\n)RSRCDELIM\";\n";
+
+    std::cout << "Embedded " << symbolName << " from file " << inputName
+              << " into file " << outputName << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "Exception thrown:" << '\n\t' << e.what() << std::endl;
     return EXIT_FAILURE;
