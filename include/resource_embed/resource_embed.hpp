@@ -17,7 +17,7 @@
 /**
  * RSRC_EMBED(rsrc)
  * 
- * Return a string matching an extern-const-char-ptr matching an embedded resource file.
+ * Return a copied string matching an extern-const-char-ptr matching an embedded resource file.
  * 
  * @author M. van de Ruit
  * 
@@ -33,7 +33,7 @@
 /**
  * RSRC_EMBED_C(rsrc)
  * 
- * Return a char pointer matching an extern-const-char-ptr matching an embedded resource file.
+ * Return a copied char pointer matching an extern-const-char-ptr matching an embedded resource file.
  * 
  * @author M. van de Ruit
  * 
