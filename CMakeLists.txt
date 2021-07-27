@@ -37,7 +37,7 @@ endfunction()
 # - target: execution target
 function(embed_resources rsrcs target)
   foreach(rsrc ${rsrcs})
-    string_embed(${target} ${rsrc})
+    string_embed(${rsrc} ${target})
   endforeach()
 endfunction()
 
@@ -47,5 +47,5 @@ endfunction()
 # - target: execution target
 function(embed_resource_dir dir target)
   file(GLOB resources ${dir}/*.*)
-  embed_resources(${target} "${resources}")
+  embed_resources("${resources}" ${target})
 endfunction()
