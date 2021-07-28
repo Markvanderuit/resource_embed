@@ -1,51 +1,55 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21)
 
+# Define project leveraging ony C++
 project(ResourceEmbed LANGUAGES CXX)
 
-# Add interface library to include header file
+# Specify interface library to provide header file
 add_library(ResourceEmbed INTERFACE)
 target_include_directories(ResourceEmbed INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Add executable to perform string embeds
-add_executable(ResourceEmbedExec ${CMAKE_CURRENT_SOURCE_DIR}/src/resource_embed.cpp)
-target_compile_features(ResourceEmbedExec PUBLIC cxx_std_17)
+# Function to recursively embed all resource files in a specified directory
+# into a target. The files are embedded as strings into an unordered map, using
+# their file paths (relative to the top resource directory) as keys. See
+# resource_embed.hpp for usage.
+# 
+# @param target - execusion target
+# @param dir - directory whose resources are embedded
+function(rsrcs_embed target dir)
+  set(output ${CMAKE_BINARY_DIR}/resources/${target}.cpp)
+  message(STATUS "Resources collected from ${dir}")
 
-# Function to embed a single resource file into a target as a string
-# args:
-# - target: execution target
-# - rsrc: file path to resource file
-function(rsrc_embed target rsrc)
-  # Define input and output file names
-  get_filename_component(inputName ${rsrc} NAME_WE)
-  set(outputName ${CMAKE_BINARY_DIR}/resources/${inputName}.cpp)
+  # Create empty resources output file
+  file(WRITE ${output} "")
 
-  # Specify command to generate file with the resource embedded as string inside
-  # Calls the executable defined above
-  add_custom_command(
-    OUTPUT ${outputName}
-    COMMAND ResourceEmbedExec ${inputName} ${rsrc} ${outputName}
-    DEPENDS ${rsrc}
-  )
+  # Append includes, unordered map and namespace to resources output file
+  file(APPEND ${output} "#include <string>\n#include <unordered_map>\n")
+  file(APPEND ${output} "namespace rsrc {\n")
+  file(APPEND ${output} "const extern std::unordered_map<std::string,std::string> __RSRC_MAP__;\n")
+  file(APPEND ${output} "const std::unordered_map<std::string,std::string> __RSRC_MAP__ = {\n")
 
-  # Append file to list of target's sources
-  target_sources(${target} PRIVATE ${outputName})
-endfunction()
+  # Collect resource files recursively
+  file(GLOB_RECURSE rsrcs ${dir}/*)
 
-# Function to embed list of resource files into target as strings
-# args:
-# - target: execution target
-# - rsrc: list of file paths to resource files
-function(rsrc_embed_multiple target rsrcs)
+  # Iterate through collected resource files
   foreach(rsrc ${rsrcs})
-    rsrc_embed(${target} ${rsrc})
-  endforeach()
-endfunction()
+    # Get relative filepath as identifying name
+    cmake_path(RELATIVE_PATH rsrc BASE_DIRECTORY ${dir} OUTPUT_VARIABLE rsrcName)
+    message(STATUS "\t${rsrcName}")
 
-# Function to embed all files in a specified directory into target as strings
-# args:
-# - target: execution target
-# - dir: directory whose files are to be embedded
-function(rsrc_embed_dir target dir)
-  file(GLOB rsrcs ${dir}/*.*)
-  rsrc_embed_multiple(${target} "${rsrcs}")
+    # Read data from resource file as text
+    file(READ ${rsrc} rsrcData)
+
+    # Append data to resources output file as a raw string literal
+    file(APPEND ${output} "{\n\"${rsrcName}\",")
+    file(APPEND ${output} "\nR\"RSRCDELIM(\n")
+    file(APPEND ${output} "${rsrcData}")
+    file(APPEND ${output} "\n)RSRCDELIM\"\n},\n")
+  endforeach()
+
+  # Append end of map, namespace to resources output file
+  file(APPEND ${output} "};\n}")
+
+  # Add to list of target's sources for compilation
+  target_sources(${target} PRIVATE ${output})
+  message(STATUS "Resources written to ${output}, linked to target ${target}")
 endfunction()
