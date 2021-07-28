@@ -40,6 +40,7 @@ namespace rsrc {
    * @param key - key matching a specific resource
    * @return boolean result
    */
+  inline
   bool exists(const std::string& key) {
     return __RSRC_MAP__.find(key) != __RSRC_MAP__.end();
   }
@@ -53,6 +54,7 @@ namespace rsrc {
    * @throws invalid_argument if a resource does not exist for a specific key
    * @return obtained resource as a (multiline) string
    */
+  inline
   const std::string& get(const std::string& key) {
     if (__RSRC_MAP__.find(key) == __RSRC_MAP__.end()) {
       throw std::invalid_argument("Resource does not exist: " + key);
