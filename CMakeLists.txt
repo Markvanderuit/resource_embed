@@ -14,9 +14,12 @@ target_include_directories(ResourceEmbed INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/i
 # 
 # @param target - execusion target
 # @param dir - directory whose resources are embedded
-function(rsrcs_embed target dir)
-  set(output ${CMAKE_BINARY_DIR}/resources/${target}.cpp)
-  message(STATUS "Resources collected from ${dir}")
+function(rsrcs_embed output_var dir)
+  message(STATUS "Collecting resources from ${dir}")
+
+  # Set output variable to resources output file
+  set(output ${CMAKE_BINARY_DIR}/resources/resources.cpp)
+  set(${output_var} ${output} PARENT_SCOPE)
 
   # Create empty resources output file
   file(WRITE ${output} "")
@@ -48,8 +51,5 @@ function(rsrcs_embed target dir)
 
   # Append end of map, namespace to resources output file
   file(APPEND ${output} "};\n}")
-
-  # Add to list of target's sources for compilation
-  target_sources(${target} PRIVATE ${output})
-  message(STATUS "Resources written to ${output}, linked to target ${target}")
+  message(STATUS "Collected resources to ${output}")
 endfunction()
